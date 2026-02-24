@@ -1,4 +1,4 @@
-#import paramiko
+import paramiko
 
 #ASCII logo 
 RED = "\033[31m"
@@ -98,3 +98,4 @@ while True:
 
     stdin, stdout, stderr = ssh.exec_command(command)
     print(stdout.read().decode())
+
