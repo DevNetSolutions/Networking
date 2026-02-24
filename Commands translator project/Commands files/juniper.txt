@@ -1,0 +1,75 @@
+###############################################
+# JUNIPER → CISCO COMMAND TRANSLATION TABLE   #
+###############################################
+
+# MODES / SESSION
+configure ~~ configure terminal
+exit ~~ end
+quit ~~ quit
+show version ~~ show version
+show system storage ~~ show flash
+show configuration ~~ show running-config
+show configuration interfaces ~~ show running-config interface
+show system uptime ~~ show version | include uptime
+show system users ~~ show users
+show system commit ~~ show startup-config
+commit ~~ write memory
+
+# HOSTNAME / LOGIN / USERS
+set system host-name ~~ hostname
+set system login user <name> class super-user ~~ username <name> privilege 15
+set system login user <name> authentication plain-text-password ~~ enable secret
+
+# INTERFACES / VLAN / LOOPBACK
+show interfaces terse ~~ show ip interface brief
+set interfaces <if> unit 0 family inet address ~~ ip address
+set interfaces <if> description ~~ description
+delete interfaces <if> description ~~ no description
+set interfaces lo0 unit 0 family inet address ~~ interface loopback
+set vlans <vlan-name> vlan-id ~~ vlan database
+set interfaces <if> unit 0 family ethernet-switching vlan members ~~ switchport access vlan
+set interfaces <if> unit 0 family ethernet-switching port-mode trunk ~~ switchport mode trunk
+set interfaces <if> unit 0 family ethernet-switching native-vlan-id ~~ switchport trunk native vlan
+
+# ROUTING / VRF
+show route ~~ show ip route
+set routing-options static route ~~ ip route
+set routing-instances <vrf> instance-type vrf ~~ ip vrf
+set routing-instances <vrf> interface ~~ ip vrf forwarding
+show routing-instances ~~ show ip vrf
+show route table <vrf>.inet.0 ~~ show ip route vrf <vrf>
+
+# IPv6
+set interfaces <if> unit 0 family inet6 address ~~ ipv6 address
+show route inet6 ~~ show ipv6 route
+set routing-options rib inet6.0 static route ~~ ipv6 route
+
+# DHCP / SECURITY
+show system services dhcp ~~ show ip dhcp pool
+show system services dhcp binding ~~ show ip dhcp binding
+set system services dhcp ~~ ip dhcp pool
+set system services dhcp option ~~ dns-server
+
+# SWITCHING / TRUNKING
+show ethernet-switching table ~~ show mac address-table
+clear ethernet-switching table ~~ clear mac address-table dynamic
+show spanning-tree ~~ show spanning-tree
+show vlans ~~ show vlan brief
+
+# OSPF / RIP / ROUTING PROTOCOLS
+set protocols ospf area ~~ router ospf
+set protocols ospf area <area> interface ~~ network
+show ospf neighbor ~~ show ip ospf neighbor
+show ospf database ~~ show ip ospf database
+set protocols rip ~~ router rip
+
+# TUNNELS / IPSEC
+set interfaces gr-0/0/0 unit 0 tunnel source ~~ tunnel source
+set interfaces gr-0/0/0 unit 0 tunnel destination ~~ tunnel destination
+set security ipsec proposal ~~ crypto ipsec transform-set
+set security ike policy ~~ crypto isakmp policy
+
+# NTP / CLOCK / SNMP
+set system ntp server ~~ ntp server
+show ntp associations ~~ show ntp status
+set snmp community ~~ snmp-server community

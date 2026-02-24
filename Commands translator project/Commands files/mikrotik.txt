@@ -1,0 +1,185 @@
+###############################################
+# MIKROTIK → CISCO COMMAND TRANSLATION TABLE #
+###############################################
+
+# MODES / SESSION
+none ~~ enable
+none ~~ disable
+none ~~ exit
+none ~~ end
+none ~~ quit
+none ~~ configure terminal
+none ~~ show flash
+none ~~ show version
+none ~~ login block-for
+none ~~ login delay
+/system identity set name= ~~ hostname
+/user set password= ~~ enable secret
+none ~~ line 0
+none ~~ line vty 0 15
+none ~~ login
+none ~~ login local
+none ~~ no password
+none ~~ banner motd
+none ~~ motd-banner
+none ~~ show
+none ~~ show running-config
+none ~~ show running-config interface
+none ~~ show running-config | section line vty
+none ~~ show startup-config
+none ~~ do show running
+none ~~ copy running-config startup-config
+none ~~ copy startup-config running-config
+none ~~ write memory
+/system reboot ~~ reload
+/user add name= ~~ username
+
+# INTERFACES / VLAN / LOOPBACK
+/interface bridge add ~~ interface vlan1
+/interface bridge vlan add ~~ vlan database
+/interface bridge add name=loopback ~~ interface loopback
+/interface print ~~ show interfaces
+/interface vlan print ~~ show interface vlan1
+/interface print ~~ show interfaces switchport
+/interface print ~~ show interfaces status
+/interface print ~~ show interfaces description
+/interface bridge vlan print ~~ show vlan
+/interface bridge vlan print ~~ show vlan brief
+/interface bridge vlan print ~~ show vlan id
+/interface bridge vlan print ~~ show vlan summary
+/interface bridge print ~~ show spanning-tree
+/interface bridge port print ~~ show spanning-tree brief
+/interface ethernet set speed= ~~ speed
+/interface ethernet set duplex= ~~ duplex
+/interface ethernet set comment= ~~ description
+none ~~ no duplex
+none ~~ no speed
+none ~~ no description
+none ~~ interface range
+/interface vlan add ~~ interface fa1/0.1
+
+# IP ADDRESSING / ROUTING / VRF
+/ip address print ~~ show ip interface brief
+/ip address add ~~ ip address
+/ip address add address=dhcp ~~ ip address dhcp
+/ip route print ~~ show ip route
+/ip route add ~~ ip route
+/ip route add vrf= ~~ ip route vrf
+/ip vrf add ~~ ip vrf
+/ip vrf add interfaces= ~~ ip vrf forwarding
+/ip vrf print ~~ show ip vrf
+/ip vrf print ~~ show ip vrf brief
+/ip vrf print ~~ show ip vrf detail
+/ip vrf print ~~ show ip vrf interfaces
+/ip vrf print ~~ show ip vrf list
+/ip route print ~~ show ip route connected
+none ~~ ip cef distributed
+/ip dns set servers= ~~ ip name-server
+/ip dns set domain= ~~ ip domain-name
+/ip route add gateway= ~~ ip default-gateway
+
+# IPv6
+/ipv6 settings set disable-ipv6=no ~~ ipv6 unicast-routing
+/ipv6 address add ~~ ipv6 address
+/ipv6 address add from-pool= ~~ ipv6 address dhcp
+/ipv6 address add eui-64=yes ~~ ipv6 address autoconfig
+/ipv6 nd print ~~ ipv6 nd
+/ipv6 route print ~~ show ipv6 route
+/ipv6 dhcp-server add ~~ ipv6 dhcp server
+none ~~ ipv6 router
+none ~~ ipv6 ospf
+
+# DHCP / SECURITY / SNOOPING
+/ip dhcp-server print ~~ show ip dhcp pool
+/ip dhcp-server lease print ~~ show ip dhcp binding
+/ip dhcp-server network add ~~ network
+/ip dhcp-server option add ~~ dns-server
+/ip dhcp-server add ~~ ip dhcp pool
+/ip dhcp-server exclude add ~~ ip dhcp excluded-address
+/ip dhcp-server print ~~ show ip dhcp database
+/ip dhcp-server print ~~ show ip dhcp conflict
+/ip dhcp-server print ~~ show ip dhcp snooping binding
+/ip dhcp-server set authoritative=yes ~~ ip dhcp snooping
+/interface ethernet set dhcp-snooping=yes ~~ ip dhcp snooping trust
+/ip arp print ~~ show ip arp
+/ip arp add ~~ ip arp inspection trust
+none ~~ ip arp inspection
+
+# SWITCHPORT / TRUNK / VTP / DTP
+/interface ethernet switch set vlan-mode=secure ~~ switchport mode access
+/interface ethernet switch set vlan-mode=trunk ~~ switchport mode trunk
+/interface ethernet switch set trunk-vlans= ~~ switchport trunk allowed vlan
+none ~~ switchport nonegotiate
+none ~~ no switchport nonegotiate
+/interface bridge vlan set pvid= ~~ switchport trunk native vlan
+none ~~ switchport trunk encapsulation dot1q
+/interface bridge vlan print ~~ show interface trunk
+none ~~ show dtp interface
+none ~~ vtp domain
+none ~~ vtp client
+none ~~ vtp server
+none ~~ vtp transparent
+none ~~ show vtp counters
+none ~~ show vtp status
+
+# CDP / LLDP / NEIGHBORS
+/ip neighbor print ~~ show cdp neighbors
+/ip neighbor print detail ~~ show cdp neighbors detail
+/lldp neighbors print ~~ show lldp neighbors
+/lldp neighbors print detail ~~ show lldp neighbors detail
+/tool mac-scan ~~ show controllers ethernet-controller
+
+# SSH / TELNET / CRYPTO
+/ip ssh print ~~ show ip ssh
+/ip ssh set strong-crypto=yes ~~ ip ssh version 2
+/ip service set telnet disabled=yes ~~ transport input ssh
+/ip service set ssh disabled=yes ~~ transport input none
+none ~~ crypto key generate rsa
+none ~~ show crypto key mypubkey rsa
+
+# MAC / TABLES / MONITORING
+/interface bridge host print ~~ show mac address-table
+/interface bridge host print ~~ show mac address-table dynamic
+/interface bridge host print ~~ show mac address-table count
+/interface bridge host print ~~ show mac address-table aging-time
+/interface bridge host remove ~~ clear mac address-table dynamic
+/log print ~~ show logging
+/log print follow=yes ~~ terminal monitor
+/log print follow=no ~~ terminal no monitor
+
+# NAT / FIREWALL / ACL
+/ip firewall nat print ~~ show ip nat translations
+/ip firewall nat add ~~ ip nat inside source
+/ip firewall nat add action=masquerade ~~ ip nat inside source list overload
+/ip firewall address-list print ~~ show access-list
+/ip firewall filter print ~~ show access-list
+/ip firewall filter add ~~ access-list
+/ip firewall filter remove ~~ no access-list
+/ip firewall filter add comment= ~~ remark
+
+# OSPF / RIP / ROUTING PROTOCOLS
+/routing ospf instance print ~~ show ip ospf
+/routing ospf neighbor print ~~ show ip ospf neighbor
+/routing ospf database print ~~ show ip ospf database
+/routing ospf interface print ~~ show ip ospf interface
+/routing ospf interface print ~~ show ip ospf interface brief
+/routing ospf instance set router-id= ~~ router-id
+/routing ospf interface set passive=yes ~~ passive-interface
+/routing ospf instance set redistribute= ~~ redistribute
+none ~~ router ospf
+none ~~ router rip
+
+# TUNNELS / IPSEC / VPN
+/interface gre add ~~ interface tunnel
+/interface gre set local-address= ~~ tunnel source
+/interface gre set remote-address= ~~ tunnel destination
+/ip ipsec proposal add ~~ crypto ipsec transform-set
+/ip ipsec peer add ~~ crypto isakmp key
+/ip ipsec policy add ~~ crypto map
+
+# NTP / CLOCK / SNMP
+/system clock set ~~ clock set
+/system ntp client print ~~ show ntp
+/system ntp client print ~~ show ntp status
+/system ntp client set enabled=yes ~~ set ntp broadcastclient enable
+/snmp print ~~ snmp-server enable traps

@@ -1,0 +1,65 @@
+###############################################
+# HUAWEI VRP → CISCO COMMAND TRANSLATION TABLE #
+###############################################
+
+# MODES / SESSION
+system-view ~~ configure terminal
+quit ~~ end
+display version ~~ show version
+display startup ~~ show startup-config
+display current-configuration ~~ show running-config
+save ~~ write memory
+
+# HOSTNAME / USERS
+sysname ~~ hostname
+local-user <name> password irreversible-cipher ~~ enable secret
+local-user <name> privilege level 15 ~~ username <name> privilege 15
+
+# INTERFACES / VLAN / LOOPBACK
+display ip interface brief ~~ show ip interface brief
+interface Vlanif ~~ interface vlan
+interface LoopBack ~~ interface loopback
+description ~~ description
+undo description ~~ no description
+ip address ~~ ip address
+undo ip address ~~ no ip address
+display vlan ~~ show vlan brief
+display mac-address ~~ show mac address-table
+
+# SWITCHPORT / TRUNK
+port link-type access ~~ switchport mode access
+port link-type trunk ~~ switchport mode trunk
+port trunk allow-pass vlan ~~ switchport trunk allowed vlan
+port trunk pvid ~~ switchport trunk native vlan
+
+# ROUTING / VRF
+display ip routing-table ~~ show ip route
+ip route-static ~~ ip route
+ip vpn-instance ~~ ip vrf
+vpn-instance <vrf> ~~ ip vrf forwarding
+
+# IPv6
+ipv6 ~~ ipv6 unicast-routing
+ipv6 address ~~ ipv6 address
+display ipv6 routing-table ~~ show ipv6 route
+
+# DHCP / SECURITY
+display dhcp server statistics ~~ show ip dhcp pool
+dhcp enable ~~ ip dhcp pool
+dhcp select interface ~~ ip dhcp pool
+dhcp server excluded-ip-address ~~ ip dhcp excluded-address
+
+# OSPF / RIP
+ospf ~~ router ospf
+display ospf peer ~~ show ip ospf neighbor
+display ospf lsdb ~~ show ip ospf database
+rip ~~ router rip
+
+# TUNNELS / IPSEC
+ipsec proposal ~~ crypto ipsec transform-set
+ike proposal ~~ crypto isakmp policy
+
+# NTP / CLOCK / SNMP
+ntp-service enable ~~ ntp server
+display ntp-service status ~~ show ntp status
+snmp-agent community ~~ snmp-server community

@@ -1,0 +1,62 @@
+#####################################################
+# ARUBA / HP PROCURE → CISCO COMMAND TRANSLATION     #
+#####################################################
+
+# MODES / SESSION
+configure ~~ configure terminal
+exit ~~ end
+show version ~~ show version
+show running-config ~~ show running-config
+show startup-config ~~ show startup-config
+write memory ~~ write memory
+
+# HOSTNAME / USERS
+hostname ~~ hostname
+password manager ~~ enable secret
+password operator ~~ username <name> privilege 15
+
+# INTERFACES / VLAN / LOOPBACK
+show ip ~~ show ip interface brief
+vlan <id> ~~ vlan database
+vlan <id> name ~~ vlan name
+interface <port> ~~ interface <port>
+name ~~ description
+no name ~~ no description
+ip address ~~ ip address
+loopback ~~ interface loopback
+
+# SWITCHPORT / TRUNK
+untagged <vlan> ~~ switchport access vlan
+tagged <vlan> ~~ switchport trunk allowed vlan
+no tagged ~~ no switchport trunk allowed vlan
+exit ~~ end
+
+# ROUTING / VRF
+ip route ~~ ip route
+show ip route ~~ show ip route
+vrf <name> ~~ ip vrf
+interface <port> vrf-attach ~~ ip vrf forwarding
+
+# IPv6
+ipv6 enable ~~ ipv6 unicast-routing
+ipv6 address ~~ ipv6 address
+show ipv6 route ~~ show ipv6 route
+
+# DHCP / SECURITY
+dhcp-server ~~ ip dhcp pool
+show dhcp-server ~~ show ip dhcp pool
+dhcp-relay ~~ ip helper-address
+
+# OSPF / RIP
+router ospf ~~ router ospf
+show ip ospf ~~ show ip ospf
+router rip ~~ router rip
+
+# MAC / MONITORING
+show mac-address ~~ show mac address-table
+clear mac-address ~~ clear mac address-table dynamic
+
+# NTP / CLOCK / SNMP
+ntp server ~~ ntp server
+show ntp ~~ show ntp status
+snmp-server community ~~ snmp-server community
