@@ -1,5 +1,5 @@
 import paramiko
-
+import os 
 #ASCII logo 
 RED = "\033[31m"
 GREEN = "\033[32m"
@@ -61,17 +61,17 @@ def read():
     print ("[~~]Available commands files: ")
     print("[~~]mikrotik / juniper / aruba_hp / huawei_vrp")
     choose_file = input("[~~]Commands file: ")
-    with open("Commands files/" + choose_file + ".txt") as cisco_read:
+    path  = os.path.join("Commands files/", choose_file + ".txt")
+    with open(path) as cisco_read:
         for res in cisco_read:
             cisco_cmd.append(res.strip())
         return cisco_cmd
 
-
+res = read()
 while True:
     content = input("[~~]Cmd: ")
     file_cmd = []
     found = False
-    res = read()
 
     def clean():
         found_local = False 
@@ -98,4 +98,5 @@ while True:
 
     stdin, stdout, stderr = ssh.exec_command(command)
     print(stdout.read().decode())
+
 
