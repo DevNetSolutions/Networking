@@ -57,11 +57,11 @@ print (" ")
 #deepseek-coder download and verify
 print("[~~]Downloading model, please wait...")
 try:
-    url = ("https://huggingface.co/TheBloke/deepseek-coder-1.3b-instruct-GGUF/resolve/main/deepseek-coder-1.3b-instruct.Q5_K_M.gguf")
-    model_name = ("deepseek-coder-1.3b-instruct.Q5_K_M.gguf")
+    url = ("https://huggingface.co/bartowski/DeepSeek-Coder-V2-Lite-Instruct-GGUF/resolve/main/DeepSeek-Coder-V2-Lite-Instruct-Q4_K_M.gguf")
+    model_name = ("DeepSeek-Coder-V2-Lite-Instruct-Q4_K_M.gguf")
     model_licence = ("https://raw.githubusercontent.com/deepseek-ai/deepseek-coder/refs/heads/main/LICENSE-MODEL")
     model_licence_name = ("LICENSE-MODEL")
-    gguf_sha = ("d5dcc2a484498b412b8bf5821b0ef2a7ea2e1984b37d15e14344259068d19a31")
+    gguf_sha = ("603bd3f8a0281d16571da7c08bd661ee17ff0d1be6fcbd1b42242da257ef0bb8")
     if model_name not in os.listdir():
         urlretrieve(url, model_name)
         print(RED, "[~~]Model downloaded successfully", RESET)
@@ -100,11 +100,14 @@ con.execute(networks_db)
 con.commit()
 ssh = paramiko.SSHClient()
 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
 llm = Llama(
-    model_path="deepseek-coder-1.3b-instruct.Q5_K_M.gguf",
-    n_ctx=4096,
-    n_threads=8,     
-#   n_gpu_layers=35   #USE THIS IF FOR USING GPU, COMMENT OUT IF USING CPU ONLY
+    model_path="DeepSeek-Coder-V2-Lite-Instruct-Q4_K_M.gguf",
+    n_ctx=8192,          # higher value for longer answers (full configs)
+    n_threads=8,
+#    n_gpu_layers=99,     
+    temperature=0.1,     # low temperature for more deterministic output
+    repeat_penalty=1.1
 )
 
 try:
@@ -147,7 +150,7 @@ def automate_save():
             f2.write(automate())
 
 
-def serve_file(server_class=HTTPServer, handler_class=BaseHTTPRequestHandler): 
+def serve_file(server_class=HTTPServer, handler_class=SimpleHTTPRequestHandler): 
     os.chdir("Commands files")
     server_ip = input("[~~]Type ip address for serving: ")
     server_address = (server_ip, 8000)
@@ -167,29 +170,69 @@ def read_configurations_from_db():
 def deepseek_prompt():
     print ("[~~]Switching to AI assisted mode...")
     print (" ")
-    print ("[~~]Model used: 'deepseek-coder-1.3b-instruct.Q5_K_M'...")
+    print ("[~~]Model used: 'DeepSeek-Coder-V2-Lite-Instruct-Q4_K_M.gguf...")
     print (" ")
     print (GREEN, "[~~]Commands:", RESET)
     print (RED, "[~~]'Exit' to quit ai assisted mode", RESET)
     print (RED, "[~~]'conf_dev' for router/switch configuration file creation", RESET)
     print (RED, "[~~]'unx' for Unix/Linux/Bsd configuration file creation", RESET)
     print (" ")
+    
+    # initial system prompt with instructions and context for the model
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                "You are an expert Cisco Network Engineer. "
+                "Your task is to generate COMPLETE, production-ready Cisco IOS/NX-OS configurations. "
+                "RULES: "
+                "1. Output ONLY the configuration code. NO explanations, NO markdown blocks (```), NO comments unless requested. "
+                "2. Do not stop until the configuration is fully complete. "
+                "3. If the user asks for a change, apply it to the existing context. "
+                "4. Strictly follow Cisco syntax hierarchy."
+            )
+        }
+    ]
+
     while True:
         deep_prompt = input("[~~]DeepSeek Prompt: ")
         if "exit" in deep_prompt.lower() or "Exit" in deep_prompt:
             print ("[~~]Switching back to manual mode...")
             break
-        response = llm(deep_prompt)
-        print (response['choices'][0]['text'].strip())
+        
+        if not deep_prompt:
+            continue
+
+        # user prompt added to the conversation history
+        messages.append({"role": "user", "content": deep_prompt})
+
+        # convert to model format
+        prompt = llm.apply_chat_template(messages, tokenize=False)
+
+        # answer gen
+        output = llm(
+            prompt,
+            max_tokens=4096,           # long answers for full configs
+            stop=["<|user|>", "<|end|>", "<|eot_id|>"], # stop at the end
+            echo=False,
+            temperature=0.1
+        )
+
+        response_text = output['choices'][0]['text'].strip()
+        print (response_text)
+
+        # Model answer to history 
+        messages.append({"role": "assistant", "content": response_text})
+
         if "conf_dev!" in deep_prompt.lower():
             dev_model = input("[~~]Enter device model: ")
             date_created = input("[~~]Enter date: ")
-            print ("[~~]Creating configuration file")
+            print ("[~~]Creating configuration file") 
             deep_seek_conf_path = os.path.join("Commands files/", "deepseek_config.txt")
             with open(deep_seek_conf_path, "w") as f3:
-                f3.write(response['choices'][0]['text'].strip())
+                f3.write(response_text)
             val1 = dev_model
-            val2 = response['choices'][0]['text'].strip()
+            val2 = response_text
             val3 = date_created
             print ("[~~]Configuration file created: deepseek_config.txt")
             sql_q = ("""INSERT INTO Configurations(device_model, configuration, created_on) VALUES (?, ?, ?)""")
@@ -199,7 +242,7 @@ def deepseek_prompt():
             check_config = input ("Use configuration file? ")
             if check_config == "yes" or check_config == "Yes":
                 print ("[~~]Configuring device with DeepSeek's response")
-                stdin, stdout, stderr = ssh.exec_command(response['choices'][0]['text'].strip())
+                stdin, stdout, stderr = ssh.exec_command(response_text)
                 print(stdout.read().decode())
             else:
                 print("[~~]Device not configured")
@@ -207,7 +250,7 @@ def deepseek_prompt():
         elif "unx" in deep_prompt:
             sh_scr_path = os.path.join("Commands files/", "auto_config.sh")
             with open(sh_scr_path, "w") as sh:
-                sh.write(response['choices'][0]['text'].strip())
+                sh.write(response_text)
             if sh_scr_path:
                 download_and_execute = ("mkdir tmp && cd tmp && wget http://{server_ip}:8000/auto_config.sh && chmod 755 auto_config.sh && ./auto_config.sh")
                 serve_file()
@@ -260,6 +303,3 @@ while True:
 
     stdin, stdout, stderr = ssh.exec_command(command)
     print(stdout.read().decode())
-
-
-
